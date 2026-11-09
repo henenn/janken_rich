@@ -1,0 +1,313 @@
+
+/* ---------------------------------------------------------
+   1. 全体の基本設定
+   --------------------------------------------------------- */
+
+/* 余白や枠線を足しても箱が大きくならないようにする定番の1行。
+   「width に書いた数字＝見た目の幅」になるので、レイアウトが崩れにくくなる */
+* {
+    box-sizing: border-box;
+}
+
+/* ページ全体：背景はクリーム色、文字はこげ茶、丸ゴシック */
+body {
+    margin: 0;
+    font-size: 32px;
+    font-family: "Hiragino Maru Gothic ProN", "Meiryo", sans-serif;
+    background: #fdf6ec;
+    color: #4a3f35;
+}
+
+
+/* ---------------------------------------------------------
+   2. 上の方（ロゴとタイトル）
+   --------------------------------------------------------- */
+
+/* 上の帯：白い背景で、中身を真ん中に */
+header {
+    background: #fff;
+    text-align: center;
+    padding: 16px 16px 12px;   /*上 左右 下 */
+}
+
+/* ムギの手のロゴ：ゆらゆら手をふる */
+header .logo {
+    display: block; /*その要素を「1行をまるごと使う箱」*/
+    width: 72px;
+    margin: 0 auto 4px;   /* auto で左右の真ん中に */
+    animation: wave 2.4s ease-in-out infinite;   /* infinite＝ずっとくり返す */
+}
+@keyframes wave {
+    0%, 100% { transform: rotate(-12deg); }   /* 左にかたむく */
+    50%      { transform: rotate(12deg); }    /* 右にかたむく */
+}
+
+/* タイトル「ムギとじゃんけん勝負」 */
+header h1 {
+    margin: 0;
+    font-size: 2.2rem;
+    letter-spacing: .08em;   /* 文字と文字の間を少し広げる */
+    line-height: 1.2;
+    color: #c9a27a;    /* ミルクティー色 */
+}
+
+
+/* ---------------------------------------------------------
+   3. メインの枠と質問文
+   --------------------------------------------------------- */
+
+/* 中身の幅を最大560pxにして、画面の真ん中に置く */
+main {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 8px 16px;
+    text-align: center;
+}
+
+/* 「あなたは にゃにを出す？」：点線で囲んだカプセル形のラベル */
+.question {
+    display: inline-block;  /*　枠の幅は文字の長さの分だけ（カプセル形になる）上下左右の余白もきちんと効く」*/
+    margin-top: 4px;
+    padding: 6px 20px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #8a7f72;
+    border: 2px dashed #e6d3b8; /* dashed 破線　dotted 点線　double 二重線 */
+    border-radius: 999px;   /* 大きい数字にすると両端がまるくなる */
+}
+
+
+/* ---------------------------------------------------------
+   4. グー・チョキ・パーのボタン
+   --------------------------------------------------------- */
+
+/* ボタン3つを横に同じ幅で並べる */
+main ul {
+    display: flex;      /* 中の li を横に並べる */
+    gap: 12px;          /* ボタンとボタンのすき間 */
+    list-style: none;   /* 先頭の「・」を消す */
+    padding: 0;
+    margin: 24px 0;
+}
+
+/* ボタン1つ分：白い角丸カードに、下だけ影をつけて立体的に */
+main li {
+    flex: 1;  /* 3つを同じ幅に */
+    padding: 8px 0;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 5px 0 #e6d3b8;
+    font-size: 2rem;
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Ctext y='26' font-size='26'%3E%F0%9F%90%BE%3C/text%3E%3C/svg%3E") 16 16, pointer; /* マウスを乗せると猫の足跡に */
+    transition: transform .1s, box-shadow .1s;
+}
+
+/* 絵文字の下の「グー」「チョキ」「パー」の文字 */
+main li span {
+    display: block;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-top: 4px;
+}
+
+/* マウスを乗せたとき：うすいオレンジに */
+main li:hover {
+    background: #fff3e0;
+}
+
+/* 押したとき：影の分だけ下に沈む */
+main li:active {
+    transform: translateY(5px);
+    box-shadow: 0 0 0 #e6d3b8;
+}
+
+
+/* ---------------------------------------------------------
+   5. 「ムギは「◯」を出したにゃ」とムギの手のフラッシュ
+   --------------------------------------------------------- */
+
+/* 文章の行：最初は隠しておき、ボタンを押したら JS で表示 */
+.pc-hand {
+    display: none;
+    margin: 8px 0;
+    font-size: 1.6rem;
+    font-weight: bold;
+}
+
+/* 「」の中に入るムギの手の枠 */
+.flash {
+    display: inline-flex;       /* 外：文字の行に並ぶ ／ 中：flexで配置 */
+    width: 120px;
+    height: 120px;
+    vertical-align: middle;          /* 文字の高さの真ん中にそろえる */
+    align-items: center;    /* 中の画像を縦の真ん中に */
+    justify-content: center;    /* 中の画像を横の真ん中に */
+}
+
+/* ムギの手の画像：最初は隠しておき、JS で表示 */
+.flash img {
+    display: none;
+    width: 85%;
+    height: 85%;
+    object-fit: contain;      /* 画像を切らずに枠に収める */
+}
+
+/* 止まったときにポンと弾む（JS が stopped を付ける） */
+.flash.stopped {
+    animation: flash-pop .50s ease-out; /* ポンと弾む速度 */
+}
+@keyframes flash-pop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.5); } /* ポンと大きくなる大きさ */
+    100% { transform: scale(1); }
+}
+
+
+/* ---------------------------------------------------------
+   6. 結果（YOU WIN・猫の写真・吹き出し）
+   --------------------------------------------------------- */
+
+/* 結果の箱：1段目に文字、2段目に「写真｜吹き出し」を並べる */
+.result-box {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-areas:             /* 並べ方の地図 */
+        "text  text"
+        "img   bubble";
+    justify-content: center;         /* 全体を左右の真ん中に */
+    align-items: center;             /* 写真と吹き出しの高さをそろえる */
+    column-gap: 16px;                /* 写真と吹き出しの間 */
+    row-gap: 20px;                   /* YOU WIN と写真の間 */
+    animation: pop .4s ease-out;
+}
+
+/* ポンと出てくる動き（箱と YOU WIN で使う） */
+@keyframes pop {
+    0%   { transform: scale(0.3); opacity: 0; }
+    70%  { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+/* --- YOU WIN / YOU LOSE / DRAW の文字 --- */
+/* --- YOU WIN / YOU LOSE / DRAW の文字（3つ共通） --- */
+.result-text {
+    grid-area: text;                 /* 1段目の真ん中に置く */
+    margin: 0;
+    line-height: 1;
+    font-size: 3.6rem;               /* 3rem → 3.6rem に大きく */
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-align: center;
+    text-shadow:
+        2px 2px 0 #fff, -2px -2px 0 #fff,
+        2px -2px 0 #fff, -2px 2px 0 #fff,     /* 白いフチ取り */
+        4px 6px 0 var(--shadow);              /* 影の色は結果ごとに変える */
+}
+
+/* --- YOU WIN：明るいオレンジ ＋ ぴょんぴょん跳ねる --- */
+.result-text.win {
+    color: #e07a5f;
+    --shadow: #f3d6c8;
+    animation: pop .5s ease-out 1s both, jump .6s ease-out 1.5s;
+}
+
+@keyframes jump {
+    0%, 100% { transform: translateY(0); }
+    30%      { transform: translateY(-20px) scale(1.1); }
+    50%      { transform: translateY(0); }
+    70%      { transform: translateY(-10px); }
+}
+
+/* --- YOU LOSE：明るい青 ＋ ブルブル震える --- */
+.result-text.lose {
+    color: #6b86a3;
+    --shadow: #d8e0e8;
+    animation: pop .5s ease-out 1s both, shake .5s ease-in-out 1.5s;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-8px) rotate(-3deg); }
+    40%      { transform: translateX(8px) rotate(3deg); }
+    60%      { transform: translateX(-6px) rotate(-2deg); }
+    80%      { transform: translateX(6px) rotate(2deg); }
+}
+
+/* --- DRAW：グリーン ＋ くねっと首をかしげる --- */
+.result-text.draw {
+    color: #c9a27a;
+    --shadow: #eadcc8;
+    animation: pop .5s ease-out 1s both, tilt .8s ease-in-out 1.5s;
+}
+
+@keyframes tilt {
+    0%, 100% { transform: rotate(0); }
+    25%      { transform: rotate(-6deg); }
+    75%      { transform: rotate(6deg); }
+}
+
+/* --- 猫の写真 --- */
+#judgment img {
+    grid-area:  img; /*グリッドエリアの場所指定 */
+    display: block;
+    width: 220px;
+    height: 220px;
+    aspect-ratio: 1 / 1;             /* たて横を必ず同じに＝正円 */
+    object-fit: cover;               /* 写真のはみ出す部分を切って枠をうめる */
+    border-radius: 50%;              /* まるく切り抜く */
+    border: 3px solid #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .15);
+    animation: jump-out 1s ease-out .5s both;   /* 左が速さ、右が待ち時間 */
+}
+
+/* 下からグイッと飛び出して、ボヨンと弾んで落ち着く動き */
+@keyframes jump-out {
+    0%   { transform: scale(0) translateY(60px) rotate(-20deg); opacity: 0; }
+    45%  { transform: scale(3.0) translateY(-30px) rotate(10deg); opacity: 1; } /* ここの大きさで飛び出し方が変わる */
+    65%  { transform: scale(0.88) translateY(0) rotate(-5deg); }
+    80%  { transform: scale(1.12) rotate(3deg); }
+    92%  { transform: scale(0.97) rotate(-1deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+
+/* --- ムギの吹き出し --- */
+.bubble {
+    grid-area: bubble;      /*グリッドエリアの場所指定 */
+    position: relative;     /* しっぽの位置の基準にする */
+    min-width: 140px;       /* 短いセリフでも横長に見せる */
+    max-width: 500px;       /* 長いセリフはここで折り返す */
+    padding: 10px 24px;
+    background: #fff;
+    border-radius: 999px;            /* 横長のカプセル形 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+    color: #4a3f35;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+    animation: bubble-in .4s ease-out 1.8s both;   /* 右が待ち時間（猫が飛び出し終わってから出る） */
+}
+
+/* 吹き出しのしっぽ：写真の方を向いた左向きの三角 */
+.bubble::after {
+    content: "";
+    position: absolute;
+    left: -12px;
+    top: 50%;
+    transform: translateY(-50%);     /* たての真ん中にそろえる */
+    border: 12px solid transparent;  /* 透明な枠のうち… */
+    border-left: 0;
+    border-right-color: #fff;        /* 右側だけ白くすると三角になる */
+}
+
+/* 吹き出しがポンと出る動き */
+@keyframes bubble-in {
+    0%   { transform: scale(0); opacity: 0; }
+    70%  { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+/* 回っている間はボタンを押せないようにする */
+main ul.spinning li {
+    pointer-events: none;   /* クリックを受け付けない */
+    opacity: .5;            /* うすくして「押せない」ことを見せる */
+}

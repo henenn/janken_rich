@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <script src="js/jquery-2.1.3.min.js"></script>
+    <link rel="stylesheet" href="css/janken.css">
+    <title>ムギとじゃんけん</title>
+</head>
+
+<body>
+
+    <header>
+        <img src="img/par.png" alt="" class="logo">
+         <h1>ムギとじゃんけん勝負</h1>
+    </header>
+
+    <main>
+        <div class="question">あなたは にゃにを出す？</div>
+        <ul>
+            <li id="gu_btn">✊<span>グー</span></li>
+            <li id="cho_btn">✌️<span>チョキ</span></li>
+            <li id="par_btn">✋<span>パー</span></li>
+        </ul>
+
+        <div class="pc-hand">ムギは<span class="flash"><img id="flash_img" src="img/gu.png" alt="ムギの手"></span>を出したにゃ</div>
+        
+        <div id="judgment"></div>
+
+    </main>
+
+    <footer></footer>
+
+    <script>
+
+//設定//
+
+     //ムギのセリフ（結果ごとにランダムに選ぶ）
+    const SERIFS = {
+        'YOU WIN':  ['いいことあるよ', 'ついてるね', 'にゃ〜'],
+        'YOU LOSE': ['かまってみろ', 'どんまい！', 'ちゅ〜るくれ！'],
+        'DRAW':     ['相思相愛', '眠い', '2人はひとつ']
+    }
+    function serif(text) {
+        const list = SERIFS[text]
+        return list[Math.floor(Math.random() * list.length)]
+    }
+
+    //猫の手のフラッシュ
+    const HAND_IMGS = ['img/gu.png', 'img/cho.png', 'img/par.png']  // 1:グー 2:チョキ 3:パー の順
+    const FLASH_TIME = 1500   // 切り替わる時間の合計（ミリ秒）
+    const FLASH_SPEED = 80    // 何ミリ秒ごとに画像を切り替えるか（小さいほど速い）
+
+    function spin(r) {
+        $('#judgment').hide()   //結果をいったん隠して、ボタンを押せなくする
+        $('.pc-hand').show()    //「ムギは「」を出したにゃ」を表示
+        $('main ul').addClass('spinning')   //ボタンの並び（ul）に spinning という目印を付けます。CSSの main ul.spinning li が効いて、回っている間ボタンが押せなくなります。
+        $('#flash_img').show()  //ムギの手の画像を表示
+        $('.flash').removeClass('stopped') // ← 前回の「ポン」の目印を外す
+
+        //画像をパッパッと切り替える
+        let i = 0
+        const timer = setInterval(function () {
+            i = (i + 1) % 3
+            $('#flash_img').attr('src', HAND_IMGS[i])
+        }, FLASH_SPEED)
+
+        //時間がきたら止めて、ムギの手を表示
+        setTimeout(function () {
+            clearInterval(timer)
+            $('#flash_img').attr('src', HAND_IMGS[r - 1])
+            $('.flash').removeClass('spinning')
+            $('.flash').addClass('stopped')
+            $('#judgment').show()
+            $('main ul').removeClass('spinning')
+        }, FLASH_TIME)
+    }
+
+//じゃんけん本体//
+   //グーを押した時アクション
+        $("#gu_btn").on("click",function(){
+
+   //乱数を使う
+    const r = Math.ceil(Math.random()*3)
+
+   //ジャッジを表示
+    let judge = '';
+    let text = '';
+    if(r==1){
+        judge = 'draw.jpg'
+        text = 'DRAW'
+    }
+    if(r==2){
+        judge = 'win.jpg'
+        text = 'YOU WIN'
+    }
+    if(r==3){
+        judge = 'lose.jpg'
+        text = 'YOU LOSE'
+    }
+
+    $('#judgment').html(
+    '<div class="result-box">' +
+        '<p class="result-text ' + text.toLowerCase() + '">' + text + '</p>' +
+        '<div class="bubble">' + serif(text) + '</div>' +   // ← セリフ追加
+        '<img src="img/' + judge + '" alt="' + text + '">' +
+    '</div>'
+    )
+    spin(r) 
+})
+
+   //チョキを押した時のアクション
+        $("#cho_btn").on("click",function(){
+
+   //乱数を使う
+    const r = Math.ceil(Math.random()*3)
+
+   //ジャッジを表示
+    let judge = '';
+    let text = '';
+    if(r==1){
+        judge = 'lose.jpg'
+        text = 'YOU LOSE'
+    }
+    if(r==2){
+        judge = 'draw.jpg'
+        text = 'DRAW'
+    }
+    if(r==3){
+        judge = 'win.jpg'
+        text = 'YOU WIN'
+    }
+
+    $('#judgment').html(
+    '<div class="result-box">' +
+        '<p class="result-text ' + text.toLowerCase() + '">' + text + '</p>' +
+        '<div class="bubble">' + serif(text) + '</div>' +   // ← セリフ追加
+        '<img src="img/' + judge + '" alt="' + text + '">' +
+    '</div>'
+    )
+    spin(r) 
+})
+
+   //パーを押した時のアクション
+        $("#par_btn").on("click",function(){
+
+   //乱数を使う
+    const r = Math.ceil(Math.random()*3)
+
+   //ジャッジを表示
+    let judge = '';
+    let text = '';
+    if(r==1){
+        judge = 'win.jpg'
+        text = 'YOU WIN'
+    }
+    if(r==2){
+        judge = 'lose.jpg'
+        text = 'YOU LOSE'
+    }
+    if(r==3){
+        judge = 'draw.jpg'
+        text = 'DRAW'
+    }
+
+    $('#judgment').html(
+    '<div class="result-box">' +
+        '<p class="result-text ' + text.toLowerCase() + '">' + text + '</p>' +
+        '<div class="bubble">' + serif(text) + '</div>' +   // ← セリフ追加
+        '<img src="img/' + judge + '" alt="' + text + '">' +
+    '</div>'
+    )
+    spin(r) 
+})
+   
+    </script>
+</body>
+
+</html>
